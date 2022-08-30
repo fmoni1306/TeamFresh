@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.VocMapper">
+    <resultMap id="vocMap" type="vocVO" autoMapping="true">
+        <id property="id" column="id"/>
+        <association property="compensation" columnPrefix="CO_" resultMap="compMap"/>
+        <association property="company" resultMap="companyMap"/>
+    </resultMap>
+
+    <resultMap id="companyMap" type="companyVO" autoMapping="true">
+        <id property="id" column="id"/>
+        <association property="charge" columnPrefix="CH_" resultMap="chargeMap"/>
+    </resultMap>
+
+    <resultMap id="chargeMap" type="chargeVO" autoMapping="true">
+        <id property="id" column="id"/>
+    </resultMap>
+
+    <resultMap id="compMap" type="compensationVO" autoMapping="true">
+        <id property="id" column="id"/>
+        <association property="penalty" resultMap="penaltyMap"/>
+    </resultMap>
+
+    <resultMap id="penaltyMap" type="penaltyVO" autoMapping="true">
+        <id property="id" column="id"/>
+        <association property="objection" resultMap="objectionMap"/>
+    </resultMap>
+
+    <resultMap id="objectionMap" type="objectionVO" autoMapping="true">
+        <id property="id" column="id"/>
+    </resultMap>
+
+    <insert id="insertVoc" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO VOC (check_yn, content, target, company)
+        VALUES (#{checkYn}, #{content}, #{target}, #{companyId})
+    </insert>
+
+    <insert id="insertCompensation" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO COMPENSATION (com_price, voc)
+        VALUES (#{comPrice}, #{voc})
+    </insert>
+
+    <insert id="insertPenalty" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO PENALTY (content, is_confirm_penalty, objection_yn, compensation)
+        VALUES (#{content}, #{isConfirmPenalty}, #{objectionYn}, #{compensation})
+    </insert>
+
+    <select id="selectVoc" resultMap="vocMap">
+        SELECT
+            v.id,
+            v.check_yn,
+            v.content,
+            C.company_type,
+            C.company_nm,
+            C.tel,
+            CH.charger_nm AS CH_CHARGET_NM,
+            CH.charger_type AS CH_CHARGER_TYPE,
+            CH.tel AS CH_TEL,
+            CP.com_price AS CO_COM_PRICE,
+            P.content AS CO_CONTENT,
+            P.is_confirm_penalty AS CO_IS_CONFIRM_PENALTY,
+            P.objection_yn AS CO_OBJECTION_YN,
+            O.ob_content AS CO_OB_CONTENT
+        FROM VOC v
+            INNER JOIN COMPANY C ON V.COMPANY = C.ID
+            INNER JOIN CHARGE CH ON C.ID = CH.COMPANY
+            INNER JOIN COMPENSATION CP ON CP.voc = V.id
+            INNER JOIN PENALTY P ON CP.ID = P.COMPENSATION
+            LEFT JOIN OBJECTION O ON P.ID = O.PENALTY
+        WHERE 1=1
+        AND v.id = #{vocId}
+    </select>
+
+    <update id="updateChargeCheck">
+        UPDATE VOC
+        SET CHECK_YN ='Y'
+        WHERE 1=1
+        AND id = #{vocId}
+    </update>
+
+    <update id="updatePenalty">
+        UPDATE PENALTY
+        SET
+            is_confirm_penalty = #{isConfirmPenalty},
+            objection_yn = #{objectionYn}
+        WHERE 1=1
+        AND id = #{id}
+    </update>
+
+    <insert id="insertObjection">
+        INSERT INTO OBJECTION (OB_CONTENT, PENALTY)
+        VALUES (#{obContent}, #{penalty})
+    </insert>
+</mapper>
