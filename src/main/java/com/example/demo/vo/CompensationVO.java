@@ -15,12 +15,14 @@ import org.apache.ibatis.type.Alias;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CompensationVO {
 
-    private Long id;
+    private Long compensationNo;
 
-    private Long voc;
+    private Integer compensationPrice;
+
+    private String compensationSign;
+
+    private Long vocNo;
 
     private PenaltyVO penalty;
-
-    private Long comPrice;
 
 }

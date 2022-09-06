@@ -15,13 +15,13 @@ import org.apache.ibatis.type.Alias;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CompanyVO {
 
-    private Long id;
+    private Long companyNo;
 
     private String companyType;
 
     private String companyNm;
 
-    private String tel;
+    private String companyTel;
 
     private ChargeVO charge;
 }

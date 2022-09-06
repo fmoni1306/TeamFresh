@@ -5,24 +5,24 @@ import com.example.demo.vo.ObjectionVO;
 import com.example.demo.vo.PenaltyVO;
 import com.example.demo.vo.VocVO;
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 
-@Repository
 @Mapper
 public interface VocMapper {
 
-    public void insertVoc(VocVO voc) throws Exception;
+    public Integer insertVoc(VocVO voc) throws Exception;
 
     public void insertCompensation(CompensationVO compensation) throws Exception;
 
     public void insertPenalty(PenaltyVO penalty) throws Exception;
 
-    public VocVO selectVoc(Long id) throws Exception;
+    public List<VocVO> selectVocList(Long chargerNo) throws Exception;
 
-    public Integer updateChargeCheck(Long vocId) throws Exception;
+    public void updateCheckVoc(Long vocNo) throws Exception;
 
-    public void updatePenalty(PenaltyVO penaltyVO) throws Exception;
+    public void updateChargerSign(Long penaltyNo) throws Exception;
 
-    public void insertObjection(ObjectionVO objectionVO) throws Exception;
+    public void insertObjection(ObjectionVO objection) throws Exception;
 }

@@ -15,9 +15,9 @@ import org.apache.ibatis.type.Alias;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ObjectionVO {
 
-    private Long id;
+    private Long objectionNo;
 
-    private Long penalty;
+    private Long penaltyNo;
 
-    private String obContent;
+    private String objectionContent;
 }

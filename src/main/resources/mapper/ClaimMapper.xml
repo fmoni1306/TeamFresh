@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.ClaimMapper">
+
+    <resultMap id="claimMap" type="claimVO" autoMapping="true">
+        <id property="claimNo" column="CLAIM_NO"/>
+        <association property="teamFreshMember" column="MEMBER_NO" select="selectTeamFreshMember"/>
+        <collection property="claimImgList" resultMap="claimImgMap"/>
+    </resultMap>
+
+    <resultMap id="claimImgMap" type="claimImgVO" autoMapping="true">
+        <id property="claimImgNo" column="CLAIM_IMG_NO"/>
+    </resultMap>
+
+    <insert id="insertClaim" parameterType="claimVO" useGeneratedKeys="true" keyProperty="claimNo">
+        INSERT INTO Claim (CLAIM_CONTENT, CHARGER_NO)
+        VALUES (#{claimContent}, #{chargerNo})
+    </insert>
+
+    <insert id="insertClaimImg" parameterType="java.util.List">
+        INSERT INTO Claim_img (IMG_TYPE, IMG_PATH, CLAIM_NO)
+        VALUES
+        <foreach collection="claimImgList" item="img" separator=",">
+            (#{img.imgType}, #{img.imgPath}, #{claimNo})
+        </foreach>
+    </insert>
+
+
+    <select id="selectClaim" resultMap="claimMap">
+        SELECT *
+        FROM Claim C
+                 INNER JOIN Claim_img CI ON C.CLAIM_NO = CI.CLAIM_NO
+    </select>
+
+    <update id="updateClaimCheck">
+        UPDATE Claim
+        SET MANAGER_CHECK_YN = #{managerCheckYn}, MEMBER_NO = #{memberNo}
+        WHERE 1 = 1
+          AND CLAIM_NO = #{claimNo}
+    </update>
+
+    <select id="selectTeamFreshMember" resultType="teamFreshMemberVO">
+        SELECT *
+        FROM TeamFresh_Member
+        WHERE 1=1
+        AND MEMBER_NO = #{memberNo}
+    </select>
+</mapper>

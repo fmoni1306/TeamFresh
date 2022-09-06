@@ -1,94 +1,93 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.mapper.VocMapper">
+    <insert id="insertVoc" useGeneratedKeys="true" keyProperty="vocNo">
+        INSERT INTO VOC (CLAIM_NO, CUSTOMER_COMPANY_NO, DELIVERY_COMPANY_NO, VOC_TARGET, VOC_CONTENT)
+        VALUES (#{claimNo}, #{customer.companyNo}, #{delivery.companyNo}, #{vocTarget}, #{vocContent})
+    </insert>
+
+    <insert id="insertCompensation" useGeneratedKeys="true" keyProperty="compensationNo">
+        INSERT INTO Compensation (VOC_NO, COMPENSATION_PRICE, COMPENSATION_SIGN)
+        VALUES (#{vocNo}, #{compensationPrice}, 'N')
+    </insert>
+
+    <insert id="insertPenalty" useGeneratedKeys="true" keyProperty="penaltyNo">
+        INSERT INTO Penalty (PENALTY_TYPE, PENALTY_CONTENT, COMPENSATION_NO)
+        VALUES (#{penaltyType}, #{penaltyContent}, #{compensationNo})
+    </insert>
+
     <resultMap id="vocMap" type="vocVO" autoMapping="true">
-        <id property="id" column="id"/>
-        <association property="compensation" columnPrefix="CO_" resultMap="compMap"/>
-        <association property="company" resultMap="companyMap"/>
+        <id property="vocNo" column="VOC_NO"/>
+        <association property="customer" columnPrefix="C_" resultMap="customerMap"/>
+        <association property="delivery" columnPrefix="D_" resultMap="deliveryMap"/>
+        <association property="compensation" column="VOC_NO" select="selectCompensation"/>
     </resultMap>
 
-    <resultMap id="companyMap" type="companyVO" autoMapping="true">
-        <id property="id" column="id"/>
-        <association property="charge" columnPrefix="CH_" resultMap="chargeMap"/>
+    <resultMap id="customerMap" type="companyVO" autoMapping="true">
+        <id property="companyNo" column="COMPANY_NO"/>
     </resultMap>
 
-    <resultMap id="chargeMap" type="chargeVO" autoMapping="true">
-        <id property="id" column="id"/>
+    <resultMap id="deliveryMap" type="companyVO" autoMapping="true">
+        <id property="companyNo" column="COMPANY_NO"/>
     </resultMap>
 
-    <resultMap id="compMap" type="compensationVO" autoMapping="true">
-        <id property="id" column="id"/>
+    <select id="selectVocList" resultMap="vocMap">
+        SELECT
+            V.*,
+            C.COMPANY_NM AS C_CUSTOMER_NM,
+            C.COMPANY_TEL AS C_CUSTOMER_TEL,
+            C.COMPANY_TYPE AS C_CUSTOEMR_TYPE,
+            C2.COMPANY_NM AS D_CUSTOMER_NM,
+            C2.COMPANY_TEL AS D_CUSTOMER_TEL,
+            C2.COMPANY_TYPE AS D_CUSTOEMR_TYPE,
+            C3.*
+        FROM Voc V
+        INNER JOIN Company C on V.CUSTOMER_COMPANY_NO = C.COMPANY_NO
+        INNER JOIN Company C2 on V.DELIVERY_COMPANY_NO = C2.COMPANY_NO
+        INNER JOIN Charger C3 on C.COMPANY_NO = C3.COMPANY_NO
+        WHERE 1=1
+        AND C3.CHARGER_NO = #{chargerNo}
+    </select>
+
+    <resultMap id="compensationMap" type="compensationVO" autoMapping="true">
+        <id property="compensationNo" column="COMPENSATION_NO"/>
         <association property="penalty" resultMap="penaltyMap"/>
     </resultMap>
 
     <resultMap id="penaltyMap" type="penaltyVO" autoMapping="true">
-        <id property="id" column="id"/>
+        <id property="penaltyNo" column="PENALTY_NO"/>
         <association property="objection" resultMap="objectionMap"/>
     </resultMap>
 
     <resultMap id="objectionMap" type="objectionVO" autoMapping="true">
-        <id property="id" column="id"/>
+        <id property="objectionNo" column="OBJECTION_NO"/>
     </resultMap>
 
-    <insert id="insertVoc" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO VOC (check_yn, content, target, company)
-        VALUES (#{checkYn}, #{content}, #{target}, #{companyId})
-    </insert>
-
-    <insert id="insertCompensation" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO COMPENSATION (com_price, voc)
-        VALUES (#{comPrice}, #{voc})
-    </insert>
-
-    <insert id="insertPenalty" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO PENALTY (content, is_confirm_penalty, objection_yn, compensation)
-        VALUES (#{content}, #{isConfirmPenalty}, #{objectionYn}, #{compensation})
-    </insert>
-
-    <select id="selectVoc" resultMap="vocMap">
-        SELECT
-            v.id,
-            v.check_yn,
-            v.content,
-            C.company_type,
-            C.company_nm,
-            C.tel,
-            CH.charger_nm AS CH_CHARGET_NM,
-            CH.charger_type AS CH_CHARGER_TYPE,
-            CH.tel AS CH_TEL,
-            CP.com_price AS CO_COM_PRICE,
-            P.content AS CO_CONTENT,
-            P.is_confirm_penalty AS CO_IS_CONFIRM_PENALTY,
-            P.objection_yn AS CO_OBJECTION_YN,
-            O.ob_content AS CO_OB_CONTENT
-        FROM VOC v
-            INNER JOIN COMPANY C ON V.COMPANY = C.ID
-            INNER JOIN CHARGE CH ON C.ID = CH.COMPANY
-            INNER JOIN COMPENSATION CP ON CP.voc = V.id
-            INNER JOIN PENALTY P ON CP.ID = P.COMPENSATION
-            LEFT JOIN OBJECTION O ON P.ID = O.PENALTY
+    <select id="selectCompensation" resultMap="compensationMap">
+        SELECT *
+        FROM Compensation C
+        INNER JOIN Penalty P on C.COMPENSATION_NO = P.COMPENSATION_NO
+        LEFT JOIN Objection O on P.PENALTY_NO = O.PENALTY_NO
         WHERE 1=1
-        AND v.id = #{vocId}
+        AND C.VOC_NO = #{vocNo}
     </select>
 
-    <update id="updateChargeCheck">
+    <update id="updateCheckVoc">
         UPDATE VOC
-        SET CHECK_YN ='Y'
+        SET CHARGER_CHECK_YN = 'Y'
         WHERE 1=1
-        AND id = #{vocId}
+        AND VOC_NO = #{vocNo}
     </update>
 
-    <update id="updatePenalty">
-        UPDATE PENALTY
-        SET
-            is_confirm_penalty = #{isConfirmPenalty},
-            objection_yn = #{objectionYn}
+    <update id="updateChargerSign">
+        UPDATE Penalty
+        SET PENALTY_SIGN = 'Y'
         WHERE 1=1
-        AND id = #{id}
+          AND PENALTY_NO = #{penaltyNo}
     </update>
 
     <insert id="insertObjection">
-        INSERT INTO OBJECTION (OB_CONTENT, PENALTY)
-        VALUES (#{obContent}, #{penalty})
+        INSERT INTO Objection (PENALTY_NO, OBJECTION_CONTENT)
+        VALUES (#{penaltyNo}, #{objectionContent})
     </insert>
 </mapper>

@@ -9,20 +9,17 @@ import org.apache.ibatis.type.Alias;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Alias("chargeVO")
+@Alias("claimImgVO")
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ChargeVO {
-    private Long chargerNo;
+public class ClaimImgVO {
 
-    private String chargerType;
+    private Long claimImgNo;
 
-    private String chargerNm;
+    private String imgType;
 
-    private String chargerTel;
+    private String imgPath;
 
-    private Integer salary;
-
-    private Integer penaltyPrice;
+    private Long claimNo;
 }

@@ -2,11 +2,15 @@ package com.example.demo.service;
 
 import com.example.demo.mapper.VocMapper;
 import com.example.demo.vo.CompensationVO;
+import com.example.demo.vo.ObjectionVO;
 import com.example.demo.vo.PenaltyVO;
 import com.example.demo.vo.VocVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Transactional
@@ -15,47 +19,66 @@ public class VocService {
     @Autowired
     VocMapper vocMapper;
 
-    public VocVO insertVoc(VocVO param) throws Exception {
+    public String insertVoc(VocVO param) {
 
-        vocMapper.insertVoc(param);
+        String response = "fail";
 
-        CompensationVO compensation = param.getCompensation();
+        try {
+            Integer result = vocMapper.insertVoc(param);
+            CompensationVO compensation = param.getCompensation();
+            compensation.setVocNo(param.getVocNo());
 
-        compensation.setVoc(param.getId());
+            vocMapper.insertCompensation(compensation);
+            PenaltyVO penalty = compensation.getPenalty();
+            penalty.setCompensationNo(compensation.getCompensationNo());
+            vocMapper.insertPenalty(penalty);
 
-        vocMapper.insertCompensation(compensation);
-
-        PenaltyVO penalty = param.getCompensation().getPenalty();
-
-        penalty.setCompensation(compensation.getId());
-
-        vocMapper.insertPenalty(penalty);
-
-        VocVO vocResult = vocMapper.selectVoc(param.getId());
+            if (result > 0) {
+                response = "success";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 
-        return vocResult;
+        return response;
     }
 
-    public boolean updateChargeCheck(Long vocId) throws Exception{
-        VocVO vocVO = vocMapper.selectVoc(vocId);
+    public List<VocVO> selectVocList(Long chargerNo) {
+        List<VocVO> vocList = new ArrayList<>();
+        try {
+            vocList = vocMapper.selectVocList(chargerNo);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return vocList;
+    }
 
-        Integer integer = vocMapper.updateChargeCheck(vocId);
+    public void updateCheckCompensation() {
+    }
 
-        if (integer > 0) {
-            return true;
-        } else {
-            return false;
+    public void updateCheckVoc(Long vocNo) {
+
+        try {
+            vocMapper.updateCheckVoc(vocNo);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    public void updatePenalty(PenaltyVO penaltyVO) throws Exception {
-        if (penaltyVO.getObjectionYn().equals("Y")) {
-            vocMapper.updatePenalty(penaltyVO);
+    public void updateChargerSign(Long penaltyNo) {
+        try {
+            vocMapper.updateChargerSign(penaltyNo);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-            penaltyVO.getObjection().setPenalty(penaltyVO.getId());
-
-            vocMapper.insertObjection(penaltyVO.getObjection());
+    public void insertObjection(ObjectionVO objection) {
+        try {
+            vocMapper.insertObjection(objection);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

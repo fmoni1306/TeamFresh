@@ -5,24 +5,29 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.apache.ibatis.type.Alias;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Alias("chargeVO")
+@Alias("claimVO")
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ChargeVO {
-    private Long chargerNo;
+public class ClaimVO {
 
-    private String chargerType;
+    private Long claimNo;
 
-    private String chargerNm;
+    private String claimContent;
 
-    private String chargerTel;
+    private Long companyNo;
 
-    private Integer salary;
+    private Long memberNo;
 
-    private Integer penaltyPrice;
+    private String managerCheckYn;
+
+    private List<ClaimImgVO> claimImgList;
+
+    private TeamFreshMemberVO teamFreshMember;
 }

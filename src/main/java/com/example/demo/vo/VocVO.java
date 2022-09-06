@@ -15,19 +15,21 @@ import org.apache.ibatis.type.Alias;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VocVO {
 
-    private Long id;
+    private Long vocNo;
 
-    private TARGET target;
+    private Long claimNo;
 
-    private String content;
+    private CompanyVO delivery;
 
-    private String checkYn;
+    private CompanyVO customer;
 
-    private Long companyId;
+    private TARGET vocTarget;
+
+    private String vocContent;
+
+    private String ChargerCheckYn;
 
     private CompensationVO compensation;
-
-    private CompanyVO company;
 
     public enum TARGET {
         DELIVERY, CUSTOMER

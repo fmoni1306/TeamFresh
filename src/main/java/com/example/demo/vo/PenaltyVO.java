@@ -15,20 +15,15 @@ import org.apache.ibatis.type.Alias;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PenaltyVO {
 
-    private Long id;
+    private Long penaltyNo;
 
-    private Long compensation;
+    private Integer claimNo;
 
-    private String content;
+    private String penaltyContent;
 
     private String penaltyType;
 
-    private String isConfirmPenalty;
-
-    private Integer price;
-
-    private String objectionYn;
+    private Long compensationNo;
 
     private ObjectionVO objection;
-
 }
